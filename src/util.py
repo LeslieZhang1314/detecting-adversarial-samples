@@ -278,6 +278,50 @@ def get_deep_representations(model, X, batch_size=256):
 
     return output
 
+def get_all_representations(model, X, dataset='mnist', batch_size=256):
+    """
+    TODO
+    :param model:
+    :param X:
+    :param dataset: 'mnist', 'cifar', 'svhn'
+    :param batch_size: default 256
+    :return:
+    """
+    assert dataset in ['mnist', 'cifar', 'svhn'], \
+        "dataset parameter must be either 'mnist' 'cifar' or 'svhn'"
+    if dataset == 'mnist':
+        0Conv2D(64, (3, 3), padding='valid', input_shape=(28, 28, 1)),
+        1Activation('relu'),
+        2Conv2D(64, (3, 3)),
+        3Activation('relu'),
+        4MaxPooling2D(pool_size=(2, 2)),
+        5Dropout(0.5),
+        6Flatten(),
+        7Dense(128),
+        8Activation('relu'),
+        9Dropout(0.5),
+        10Dense(10),
+        11Activation('softmax')
+        n_layers = 5 # layers: conv, conv, max-pool,dense,dense
+        output = np.zeros(shape=(len(X), n_layers))
+        funcs = [K.function([model.layers[0].input, K.learning_phase()], [out]) for out in
+                 [model.layers[0].output, model.layers[2].output, model.layers[6].output,
+                  model.layers[7].output, model.layers[10].output]]  # evaluation functions
+
+        n_batches = int(np.ceil(X.shape[0] / float(batch_size)))
+        for i in range(n_batches):
+            start = i * batch_size
+            end = (i + 1) * batch_size
+            activations = []
+            for func in funcs:
+                tmp = func([X[start:end], 0])[0]
+                tmp
+                activations.append(func([X[start:end], 0])[0])
+            output[:] = \
+                get_encoding([X[i * batch_size:(i + 1) * batch_size], 0])[0]
+
+    return output
+
 
 def score_point(tup):
     """
